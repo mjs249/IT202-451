@@ -9,7 +9,8 @@
             console.log("loaded via javascript");
             //TODO: add any extra onload processing you may need here
             // Add event listeners to nav links
-            let navLinks = document.querySelectorAll("nav ul li a");
+            
+	    let navLinks = document.querySelectorAll("nav ul li a");
             navLinks.forEach(link => {
                 link.addEventListener("click", (event) => {
                     event.preventDefault(); // prevent the default action
