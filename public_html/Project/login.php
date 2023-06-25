@@ -1,5 +1,5 @@
 <?php
-require(__DIR__ . "/../../partials/nav.php");
+require_once(__DIR__ . "/../../partials/nav.php");
 ?>
 <form onsubmit="return validate(this)" method="POST">
     <div>
@@ -23,28 +23,33 @@ require(__DIR__ . "/../../partials/nav.php");
 <?php
 //TODO 2: add PHP Code
 if (isset($_POST["email"]) && isset($_POST["password"])) {
-    $email = se($_POST, "email", "", false);
-    $password = se($_POST, "password", "", false);
+    $email = se($_POST, "email", "", false); //$_POST["email"];
+    $password = se($_POST, "password", "", false); //$_POST["password"];
 
     //TODO 3
     $hasError = false;
     if (empty($email)) {
-        echo "Email must not be empty";
+        flash("Email must be provided <br>");
         $hasError = true;
     }
     //sanitize
+    //$email = filter_var($email, FILTER_SANITIZE_EMAIL);
     $email = sanitize_email($email);
     //validate
+    /*if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        flash("Please enter a valid email <br>");
+        $hasError = true;
+    }*/
     if (!is_valid_email($email)) {
-        echo "Invalid email address";
+        flash("Please enter a valid email <br>");
         $hasError = true;
     }
     if (empty($password)) {
-        echo "password must not be empty";
+        flash("Password must be provided <br>");
         $hasError = true;
     }
     if (strlen($password) < 8) {
-        echo "Password too short";
+        flash("Password must be at least 8 characters long <br>");
         $hasError = true;
     }
     if (!$hasError) {
@@ -59,19 +64,20 @@ if (isset($_POST["email"]) && isset($_POST["password"])) {
                     $hash = $user["password"];
                     unset($user["password"]);
                     if (password_verify($password, $hash)) {
-                        echo "Weclome $email";
+                        flash("Welcome $email");
                         $_SESSION["user"] = $user;
                         die(header("Location: home.php"));
                     } else {
-                        echo "Invalid password";
+                        flash("Invalid password");
                     }
                 } else {
-                    echo "Email not found";
+                    flash("Email not found");
                 }
             }
         } catch (Exception $e) {
-            echo "<pre>" . var_export($e, true) . "</pre>";
+            flash("<pre>" . var_export($e, true) . "</pre>");
         }
     }
 }
 ?>
+<?php require_once(__DIR__ . "/../../partials/flash.php");
