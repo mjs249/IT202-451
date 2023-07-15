@@ -24,19 +24,27 @@
     moveMeUp(document.getElementById("flash"));
 </script>
 <style>
-    .alert-success {
-        background-color: green
-    }
+.alert-success {
+    background-color: green
+}
 
-    .alert-warning {
-        background-color: yellow;
-    }
+.alert-warning {
+    background-color: yellow;
+}
 
-    .alert-danger {
-        background-color: red;
-    }
+.alert-danger {
+    background-color: red;
+}
 
-    .alert-info {
-        background-color: teal;
-    }
+.alert-info {
+    background-color: teal;
+}
+nav li{display: inline; background-color: white;}
+nav li a{color: black}
+
+body{
+background-color: whitesmoke;
+color: rgb(0,0,0);
+
+}
 </style>
