@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        //modified from http://jsfiddle.net/bencentra/q1s8gmqv/?utm_source=website&utm_medium=embed&utm_campaign=q1s8gmqv
+
+        var canvas;
+        var context;
+        var loop;
+        var leftPaddle;
+        var rightPaddle;
+        var ball;
+        var paddleWidth = 25;
+        var paddleHeight = 100;
+        var ballSize = 10;
+        var ballSpeed = 3;
+        var paddleSpeed = 6;
+        var drawables = [];
+        // Key Codes
+        var W = 87;
+        var S = 83;
+        var UP = 38;
+        var DOWN = 40;
+        var visibilityPercent = 0.6;
+        var minWinningScore = 11;
+        var countdown = null;
+        var gameStarted = false;
+        // Keep track of pressed keys
+        var keys = {
+            W: false,
+            S: false,
+            UP: false,
+            DOWN: false
+        };
+
+        // Keep track of the score
+        var leftScore = 0;
+        var rightScore = 0;
+        function init() {
+            canvas = document.getElementById("board");
+            if (canvas.getContext) {
+                context = canvas.getContext("2d");
+                let offset = canvas.width * .05;
+                leftPaddle = makeRect(offset, canvas.height / 2 - paddleHeight / 2, paddleWidth, paddleHeight, paddleSpeed, '#BC0000');
+                rightPaddle = makeRect(canvas.width - paddleWidth - offset, canvas.height / 2 - paddleHeight / 2, paddleWidth, paddleHeight, paddleSpeed, '#0000BC');
+                ball = makeRect(0, 0, ballSize, ballSize, ballSpeed, '#000000');
+                drawables.push(leftPaddle);
+                drawables.push(rightPaddle);
+                drawables.push(ball);
+                resetBall();
+                attachKeyListeners();
+                loop = window.setInterval(gameLoop, 16);
+                displayGameInstructions(); // display the instructions
+            }
+        }
+
+
+        function startGame() {
+            document.getElementById("startButton").disabled = true;
+
+            countdown = 3;
+            let countdownInterval = setInterval(function () {
+                erase();
+                countdown -= 1;
+                if (countdown <= 0) {
+                    erase();
+                    let beginX = canvas.width / 2 - 25;
+                    let beginY = ball.y - 75; 
+                    context.fillStyle = '#000000';
+                    context.font = '50px Arial';
+                    context.textAlign = 'center';
+                    context.fillText('Begin!', beginX + 25, beginY + 40); // 25 and 40 are approx. half the width and height of the countdown numbers
+                    setTimeout(function () {
+                        erase();
+                        gameStarted = true;
+                        canvas.focus();
+                    }, 1000);
+                    clearInterval(countdownInterval);
+                    countdown = null;
+                }
+            }, 1000);
+        }
+        function resetBall() {
+            ball.x = canvas.width / 2 - ball.w / 2;
+            ball.y = canvas.height / 2 - ball.w / 2;
+            // Modify the ball object to have two speed properties, one for X and one for Y
+            ball.sX = ballSpeed;
+            ball.sY = ballSpeed / 2;
+
+            // Randomize initial direction
+            if (Math.random() > 0.5) {
+                ball.sX *= -1;
+            }
+            // Randomize initial direction
+            if (Math.random() > 0.5) {
+                ball.sY *= -1;
+            }
+        }
+        // Bounce the ball off of a paddle
+        function bounceBall() {
+            // Increase and reverse the X speed
+            if (ball.sX > 0) {
+                ball.sX += 1;
+                // Add some "spin"
+                if (keys.W || keys.UP) {
+                    ball.sY -= 1;
+                } else if (keys.S || keys.DOWN) {
+                    ball.sY += 1;
+                }
+            } else {
+                ball.sX -= 1;
+                // Add some "spin"
+                if (keys.W || keys.UP) {
+                    ball.sY -= 1;
+                } else if (keys.S || keys.DOWN) {
+                    ball.sY += 1
+                }
+            }
+            ball.sX *= -1;
+        }
+        function attachKeyListeners() {
+            // Listen for keydown events
+            canvas.addEventListener('keydown', function (e) {
+                if (e.keyCode === W) {
+                    keys.W = true;
+                }
+                if (e.keyCode === S) {
+                    keys.S = true;
+                }
+                if (e.keyCode === UP) {
+                    keys.UP = true;
+                    e.preventDefault(); // prevent scrolling
+                }
+                if (e.keyCode === DOWN) {
+                    keys.DOWN = true;
+                    e.preventDefault(); // prevent scrolling
+                }
+            });
+            canvas.addEventListener('keyup', function (e) {
+                console.log("keyup", e);
+                if (e.keyCode === W) {
+                    keys.W = false;
+                }
+                if (e.keyCode === S) {
+                    keys.S = false;
+                }
+                if (e.keyCode === UP) {
+                    keys.UP = false;
+                }
+                if (e.keyCode === DOWN) {
+                    keys.DOWN = false;
+                }
+                console.log(keys);
+            });
+        }
+        // Create a rectangle object - for paddles, ball, etc
+        function makeRect(x, y, width, height, speed, color) {
+            if (!color)
+                color = '#000000';
+            return {
+                x: x,
+                y: y,
+                w: width,
+                h: height,
+                s: speed,
+                c: color,
+                draw: function () {
+                    context.fillStyle = this.c;
+                    context.fillRect(this.x, this.y, this.w, this.h);
+                }
+            };
+        }
+        function doAI() {
+            if (ball.x >= canvas.width * visibilityPercent) {
+                let paddleHalf = paddleHeight / 2;
+
+                if (ball.y > rightPaddle.y + paddleHalf) {
+                    rightPaddle.y += rightPaddle.s;
+                } else if (ball.y < rightPaddle.y) {
+                    rightPaddle.y -= rightPaddle.s;
+                }
+            }
+            clampToCanvas(rightPaddle);
+        }
+        function movePaddle() {
+            if (keys.W || keys.UP) {
+                leftPaddle.y -= leftPaddle.s;
+            }
+            if (keys.S || keys.DOWN) {
+                leftPaddle.y += leftPaddle.s;
+            }
+            clampToCanvas(leftPaddle);
+        }
+        function clampToCanvas(paddle) {
+            if (paddle.y < 0) {
+                paddle.y = 0;
+            }
+            if (paddle.y + paddle.h > canvas.height) {
+                paddle.y = canvas.height - paddle.h;
+            }
+        }
+        function moveBall() {
+            // Move the ball
+            ball.x += ball.sX;//move in x coordinate
+            ball.y += ball.sY;// move in y coordinate
+            // Bounce the ball off the top/bottom
+            if (ball.y < 0 || ball.y + ball.h > canvas.height) {
+                ball.sY *= -1;
+            }
+        }
+        function checkPaddleCollision() {
+            // Bounce the ball off the paddles
+            let ballcY = ball.y + ball.h / 2;
+            if (ballcY >= leftPaddle.y && ballcY <= leftPaddle.y + leftPaddle.h) {
+                //left side of ball passes right side of paddle
+                if (ball.x <= leftPaddle.x + leftPaddle.w) {
+                    bounceBall();
+                }
+            }
+            if (ballcY >= rightPaddle.y && ballcY <= rightPaddle.y + rightPaddle.h) {
+                //right side of ball passes left side of paddle
+                if (ball.x + ball.w >= rightPaddle.x) {
+                    bounceBall();
+                }
+            }
+        }
+        function checkScore() {
+            if (!gameStarted) {
+                return;
+            }
+
+            // Score if the ball goes past a paddle
+            if (ball.x < leftPaddle.x) {
+                rightScore++;
+                resetBall();
+                if (rightScore >= minWinningScore && (rightScore - leftScore) >= 2) {
+                    clearInterval(loop);
+                    displayWinnerPopup("Right player", rightScore, leftScore);
+                }
+            } else if (ball.x + ball.w > rightPaddle.x + rightPaddle.w) {
+                leftScore++;
+                resetBall();
+                if (leftScore >= minWinningScore && (leftScore - rightScore) >= 2) {
+                    clearInterval(loop);
+                    displayWinnerPopup("Left player", leftScore, rightScore);
+                }
+            }
+        }
+
+        function displayWinnerPopup(winner, winnerScore, loserScore) {
+            clearInterval(loop); // Stop the game loop
+
+            // Create a popup message
+            let popup = document.createElement("div");
+            popup.style.position = "fixed";
+            popup.style.left = "50%";
+            popup.style.top = "50%";
+            popup.style.transform = "translate(-50%, -50%)";
+            popup.style.background = "#fff";
+            popup.style.padding = "20px";
+            popup.style.border = "1px solid #000";
+
+            // Display the winner and final scores
+            let message = document.createElement("p");
+            message.textContent = winner + " wins with a score of " + winnerScore + " to " + loserScore + "!";
+            popup.appendChild(message);
+
+            // Create a reset button
+            let resetButton = document.createElement("button");
+            resetButton.textContent = "Reset Game";
+            resetButton.addEventListener("click", function () {
+                document.body.removeChild(popup);
+                resetGame();
+            });
+            popup.appendChild(resetButton);
+
+            // Add the popup to the body
+            document.body.appendChild(popup);
+        }
+
+        function resetGame() {
+            // Reset the scores
+            leftScore = 0;
+            rightScore = 0;
+
+            // Reset the ball and paddles
+            resetBall(); // corrected here
+            leftPaddle.y = canvas.height / 2 - paddleHeight / 2;
+            rightPaddle.y = canvas.height / 2 - paddleHeight / 2;
+            erase();
+            // Restart the game loop
+            clearInterval(loop); // clear the old loop interval
+            loop = window.setInterval(gameLoop, 16);
+            gameStarted = false; // reset game started flag
+            document.getElementById("startButton").disabled = false; // enable start button
+
+            // Give focus back to the canvas
+            canvas.focus();
+            erase(); // Clear the canvas
+            displayGameInstructions(); // Draw the game rules
+        }
+
+        function drawScores() {
+            // Draw the scores
+            context.fillStyle = '#000000';
+            context.font = '24px Arial';
+            context.textAlign = 'left';
+            let offsetY = canvas.height * .05;
+            let offsetX = canvas.width * .01;
+            context.fillText('Score: ' + leftScore, offsetX, offsetY);
+            context.textAlign = 'right';
+            context.fillText('Score: ' + rightScore, canvas.width - offsetX, offsetY);
+        }
+        function erase() {
+            context.fillStyle = '#FFFFFF';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        function displayGameInstructions() {
+            context.fillStyle = '#000000';
+            context.font = '16px Arial';
+            context.textAlign = 'center';
+            context.fillText('First to 11 points wins. Must win by 2 points.', canvas.width / 2, canvas.height - 20);
+        }
+
+        function gameLoop() {
+            if (gameStarted) {
+                erase();
+                drawScores();
+                movePaddle();
+                moveBall();
+                doAI();
+                checkPaddleCollision();
+                checkScore();
+            }
+
+            for (let i = 0; i < drawables.length; i++) {
+                drawables[i].draw();
+            }
+
+            if (countdown !== null) {
+                let countdownX = canvas.width / 2 - 25;
+                let countdownY = ball.y - 75; // 75 is an arbitrary number, adjust it as needed
+                context.fillStyle = '#FFFFFF';
+                context.fillRect(countdownX, countdownY, 50, 50);  // Erase the old countdown
+                context.fillStyle = '#000000';
+                context.font = '50px Arial';
+                context.textAlign = 'center';
+                context.fillText(countdown, canvas.width / 2, countdownY + 40); // 40 is approx. half the height of the countdown numbers
+                return;
+            }
+        }
+    </script>
+    <style>
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #title-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        canvas:focus {
+            border: 3px solid black;
+        }
+
+        canvas:not(:focus) {
+            border: 1px dotted black;
+        }
+
+        #startButton {
+            margin-top: 20px;
+        }
+    </style>
+
+</head>
+
+<body onload="init();">
+    <div id="game-container">
+        <div id="title-container">
+            <h1>AI Pong Sample</h1>
+            <h3><a href="index.html">Back</a></h3>
+            <a href="http://bencentra.com/2017-07-11-basic-html5-canvas-games.html">Collection of Canvas based games by
+                Ben Centra</a>
+        </div>
+        <canvas tabindex="0" id="board" width="600px" height="600px"></canvas>
+        <button id="startButton" onclick="startGame()">Start Game</button>
+    </div>
+    </div>
+</body>
+
+</html>
