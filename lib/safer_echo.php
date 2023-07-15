@@ -14,23 +14,19 @@ function se($v, $k = null, $default = "", $isEcho = true)
         $returnValue = $v->$k;
     } else {
         $returnValue = $v;
-        //added 07-05-2021 to fix case where $k of $v isn't set
-        //this is to kep htmlspecialchars happy
         if (is_array($returnValue) || is_object($returnValue)) {
+            $returnValue = $default;
+        } else if ($returnValue === null) {
             $returnValue = $default;
         }
     }
-    if (!isset($returnValue)) {
-        $returnValue = $default;
-    }
     if ($isEcho) {
-        //https://www.php.net/manual/en/function.htmlspecialchars.php
-        echo htmlspecialchars($returnValue, ENT_QUOTES);
+        echo htmlspecialchars($returnValue ?? '', ENT_QUOTES);
     } else {
-        //https://www.php.net/manual/en/function.htmlspecialchars.php
-        return htmlspecialchars($returnValue, ENT_QUOTES);
+        return htmlspecialchars($returnValue ?? '', ENT_QUOTES);
     }
 }
+
 function safer_echo($v, $k = null, $default = "", $isEcho = true)
 {
     return se($v, $k, $default, $isEcho);
