@@ -29,33 +29,38 @@ if (isset($_POST["save"])) {
     $email = se($_POST, "email", null, false);
     $username = se($_POST, "username", null, false);
 
-    $params = [":email" => $email, ":username" => $username, ":id" => get_user_id()];
-    $db = getDB();
-    $updateSuccess = false;
+    // Check if username is valid
+    if (!is_valid_username($username)) {
+        flash("The provided username is not valid. Please try again with a different username.", "warning");
+        $updateSuccess = false; 
+    } else {
+        $params = [":email" => $email, ":username" => $username, ":id" => get_user_id()];
+        $db = getDB();
+        $updateSuccess = false;
 
-    // Update email and username
-    $stmt = $db->prepare("UPDATE Users SET email = :email, username = :username WHERE id = :id");
-    try {
-        $stmt->execute($params);
+        // Update email and username
+        $stmt = $db->prepare("UPDATE Users SET email = :email, username = :username WHERE id = :id");
+        try {
+            $stmt->execute($params);
 
-        // Update session data
-        $_SESSION["user"]["email"] = $email;
-        $_SESSION["user"]["username"] = $username;
+            // Update session data
+            $_SESSION["user"]["email"] = $email;
+            $_SESSION["user"]["username"] = $username;
 
-        $updateSuccess = true;
-    } catch (Exception $e) {
-        if ($e->errorInfo[1] === 1062) {
-            preg_match("/Users.(\w+)/", $e->errorInfo[2], $matches);
-            if (isset($matches[1])) {
-                flash("The chosen " . $matches[1] . " is not available.", "warning");
+            $updateSuccess = true;
+        } catch (Exception $e) {
+            if ($e->errorInfo[1] === 1062) {
+                preg_match("/Users.(\w+)/", $e->errorInfo[2], $matches);
+                if (isset($matches[1])) {
+                    flash("The chosen " . $matches[1] . " is not available.", "warning");
+                } else {
+                    echo "<pre>" . var_export($e->errorInfo, true) . "</pre>";
+                }
             } else {
                 echo "<pre>" . var_export($e->errorInfo, true) . "</pre>";
             }
-        } else {
-            echo "<pre>" . var_export($e->errorInfo, true) . "</pre>";
         }
     }
-
     // Password Reset
     $current_password = se($_POST, "currentPassword", null, false);
     $new_password = se($_POST, "newPassword", null, false);
@@ -85,7 +90,6 @@ if (isset($_POST["save"])) {
                             }
                         } else {
                             flash("The new password cannot be the same as the current password.", "warning");
-                            $updateSuccess = false; // Set the update success flag to false
                         }
                     } else {
                         flash("Current password is invalid", "warning");
