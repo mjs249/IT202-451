@@ -18,8 +18,9 @@ function isValidUsername (username) {
     const pattern = /^[a-z0-9_-]{3,16}$/;
     return pattern.test(username);
 }
-function isValidEmail (email) {
-
+function isValidEmail(email) {
+    const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return pattern.test(email);
 }
 function isValidPassword (password) {
     if (!password) {

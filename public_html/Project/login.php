@@ -13,29 +13,30 @@ require_once(__DIR__ . "/../../partials/nav.php");
     <input type="submit" value="Login" />
 </form>
 <script>
-    function validate(form) {
-        //TODO 1: implement JavaScript validation
-        //ensure it returns false for an error and true for success
-        let isValid = true;
-        const email = form.email.value;
-        const password = form.password.value;
-        if (email.indexOf("@") > -1) {
-            if (!isValidEmail(email)) {
-                flash("Invalid email", "danger");
-                isValid = false;
-            }
-        } else {
-            if (!isValidUsername(email)) {
-                flash("Username must be lowercase, 3-16 characters, and contain only a-z, 0-9, _ or -", "danger");
-                isValid = false;
-            }
-        }
-        if (!isValidPassword(password)) {
-            flash("Password too short", "danger");
+   function validate(form) {
+    let isValid = true;
+    const email = form.email.value;
+    const password = form.password.value;
+    
+    if (email.includes("@")) {
+        if (!isValidEmail(email)) {
+            flash("Invalid email", "danger");
             isValid = false;
         }
-        return isValid;
+    } else {
+        if (!isValidUsername(email)) {
+            flash("Username must be lowercase, 3-16 characters, and contain only a-z, 0-9, _ or -", "danger");
+            isValid = false;
+        }
     }
+
+    if (!isValidPassword(password)) {
+        flash("Password too short", "danger");
+        isValid = false;
+    }
+    
+    return isValid;
+}
 </script>
 <?php
 //TODO 2: add PHP Code
@@ -43,32 +44,24 @@ if (isset($_POST["email"]) && isset($_POST["password"])) {
     $email = se($_POST, "email", "", false); //$_POST["email"];
     $password = se($_POST, "password", "", false); //$_POST["password"];
 
-    //TODO 3
     $hasError = false;
     if (empty($email)) {
-        flash("Email must be provided <br>");
+        flash("Email/Username must be provided");
         $hasError = true;
     }
-    if (str_contains($email, "@")) {
-        //sanitize
-        $email = sanitize_email($email);
-        //validate
-        if (!is_valid_email($email)) {
-            flash("Invalid email address");
-            $hasError = true;
-        }
-    } else {
-        if (!is_valid_username($email)) {
-            flash("Invalid username");
-            $hasError = true;
-        }
+
+    if (!is_valid_email($email) && !is_valid_username($email)) {
+        flash("Invalid email/username");
+        $hasError = true;
     }
+
     if (empty($password)) {
-        flash("Password must be provided <br>");
+        flash("Password must be provided");
         $hasError = true;
     }
+
     if (strlen($password) < 8) {
-        flash("Password must be at least 8 characters long <br>");
+        flash("Password must be at least 8 characters long");
         $hasError = true;
     }
     if (!$hasError) {

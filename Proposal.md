@@ -1,7 +1,8 @@
-# Project Name: (Which Project)
-## Project Summary: (Copy from proposal)
-## Github Link: (Prod Branch of Project Folder)
-## Project Board Link: 
+# Project Name: Simple Bank
+## Project Summary: This project will create a bank simulation for users. They’ll be able to have various accounts, do standard bank functions like deposit, withdraw, internal (user’s accounts)/external(other user’s accounts) transfers, and creating/closing accounts.
+
+## Github Link: https://github.com/mjs249/IT202-451/tree/prod/public_html/Project
+## Project Board Link: https://github.com/users/mjs249/projects/3
 ## Website Link: (Heroku Prod of Project folder)
 ## Your Name:
 
@@ -17,33 +18,33 @@
 ### Proposal Checklist and Evidence
 
 - Milestone 1
-    - [x] \(03/05/2022) User will be able to register a new account
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) User will be able to register a new account
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/register.php](https://mt85-prod.herokuapp.com/Project/register.php)
-    - [x] \(03/05/2022) User will be able to login to their account (given they enter the correct credentials)
-        -  [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) User will be able to login to their account (given they enter the correct credentials)
+        -  [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/login.php](https://mt85-prod.herokuapp.com/Project/login.php)
-    - [x] \(03/05/2022) User will be able to logout
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) User will be able to logout
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/logout.php](https://mt85-prod.herokuapp.com/Project/logout.php)
-    - [ ] \(mm/dd/yyyy of completion) Basic security rules implemented
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) Basic security rules implemented
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/profile.php](https://mt85-prod.herokuapp.com/Project/profile.php)
-    - [ ] \(mm/dd/yyyy of completion) Basic Roles implemented
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) Basic Roles implemented
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/admin/create_role.php](https://mt85-prod.herokuapp.com/Project/admin/create_role.php)
-    - [ ] \(mm/dd/yyyy of completion) Site should have basic styles/theme applied; everything should be styled
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) Site should have basic styles/theme applied; everything should be styled
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/home.php](https://mt85-prod.herokuapp.com/Project/home.php)
         - [https://mt85-prod.herokuapp.com/Project/styles.css](https://mt85-prod.herokuapp.com/Project/styles.css)
-    - [ ] \(mm/dd/yyyy of completion) Any output messages/errors should be “user friendly”
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) Any output messages/errors should be “user friendly”
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/logout.php](https://mt85-prod.herokuapp.com/Project/logout.php)
-    - [ ] \(mm/dd/yyyy of completion) User will be able to see their profile
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) User will be able to see their profile
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/profile.php](https://mt85-prod.herokuapp.com/Project/profile.php)
-    - [ ] \(mm/dd/yyyy of completion) User will be able to edit their profile
-        - [Milestone 1](https://github.com/MattToegel/IT202/blob/Milestone1/public_html/Project/milestone1.md)
+    - [x] \(07/15/2023) User will be able to edit their profile
+        - [Milestone 1](https://github.com/mjs249/IT202-451/blob/Milestone1/public_html/Project/milestone1.md)
         - [https://mt85-prod.herokuapp.com/Project/profile.php](https://mt85-prod.herokuapp.com/Project/profile.php)
 - Milestone 2
   - (duplicate template here for Milestone 1 features)
