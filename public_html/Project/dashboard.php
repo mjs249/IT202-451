@@ -6,8 +6,7 @@ require(__DIR__ . "/../../partials/nav.php");
 <html>
 <head>
     <title>Dashboard</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Include your CSS styles here -->
-</head>
+    <link rel="stylesheet" href="styles.css"> 
 <body>
     <h1>Welcome to Your Dashboard</h1>
     <?php if (is_logged_in(true)) : ?>
@@ -18,7 +17,7 @@ require(__DIR__ . "/../../partials/nav.php");
 
     <nav>
         <ul>
-            <li><a href="#">Create Account</a></li>
+        <li><a href="<?php echo get_url('newAccount.php'); ?>">Create Account</a></li>
             <li><a href="#">My Accounts</a></li>
             <li><a href="#">Deposit</a></li>
             <li><a href="#">Withdraw</a></li>

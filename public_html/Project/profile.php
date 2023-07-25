@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__ . "/../../partials/nav.php");
-require_once(__DIR__ . "/../../lib/sanitizers.php"); // Replace "path/to/sanitizers.php" with the actual path to your sanitizers.php file
+require_once(__DIR__ . "/../../lib/sanitizers.php"); 
 is_logged_in(true);
 ?>
 
