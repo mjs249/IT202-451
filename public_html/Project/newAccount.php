@@ -14,26 +14,49 @@ if (isset($_POST["create_account"])) {
     $account_type = "checking";
     $initial_deposit = 5;
 
-    $db = getDB();
-    $stmt = $db->prepare("INSERT INTO Transactions (account_src, account_dest, balance_change, transaction_type, expected_total) VALUES (-1, :account_dest, :balance_change, 'initial_deposit', :expected_total)");
     try {
+        $db = getDB();
+        $db->beginTransaction(); // Start a transaction to handle both INSERTs as a pair
+
+        // Step 1: Record the transaction from the world account to the new checking account
+        $stmt = $db->prepare("INSERT INTO Transactions (account_src, account_dest, balance_change, transaction_type, expected_total) VALUES (:account_src, NULL, :balance_change, 'initial_deposit', :expected_total)");
         $stmt->execute([
-            ":account_dest" => $account_number,
-            ":balance_change" => $initial_deposit,
+            ":account_src" => -1, // Use -1 for the world account
+            ":balance_change" => -$initial_deposit, // Negative change for the world account
             ":expected_total" => $initial_deposit,
         ]);
-    } catch (Exception $e) {
-        echo "<pre>" . var_export($e->errorInfo, true) . "</pre>";
-    }
 
-    $stmt = $db->prepare("INSERT INTO RM_Accounts (account, user_id, balance, account_type) VALUES (:account, :user_id, :balance, :account_type)");
-    try {
+        // Get the last inserted transaction ID
+        $transaction_id = $db->lastInsertId();
+
+        // Step 2: Update the Accounts table with the new checking account data
+        $stmt = $db->prepare("INSERT INTO Accounts (account_number, user_id, balance, account_type) VALUES (:account_number, :user_id, :balance, :account_type)");
         $stmt->execute([
-            ":account" => $account_number,
+            ":account_number" => $account_number,
             ":user_id" => $user_id,
             ":balance" => $initial_deposit,
             ":account_type" => $account_type,
         ]);
+
+        // Get the last inserted account ID
+        $account_id = $db->lastInsertId();
+
+        // Update the transaction with the correct 'account_dest' value
+        $stmt = $db->prepare("UPDATE Transactions SET account_dest = :account_dest WHERE id = :transaction_id");
+        $stmt->execute([
+            ":account_dest" => $account_id,
+            ":transaction_id" => $transaction_id,
+        ]);
+
+        // Step 3: Update the balance of the world account
+        $stmt = $db->prepare("UPDATE Accounts SET balance = balance - :balance_change WHERE id = :world_account_id");
+        $stmt->execute([
+            ":world_account_id" => -1, // Use -1 for the world account ID
+            ":balance_change" => $initial_deposit,
+        ]);
+
+        // Commit the transaction
+        $db->commit();
 
         // User-friendly success message
         flash("Checking account created successfully!", "success");
@@ -42,7 +65,13 @@ if (isset($_POST["create_account"])) {
         header("Location: " . get_url('dashboard.php'));
         exit;
     } catch (Exception $e) {
-        echo "<pre>" . var_export($e->errorInfo, true) . "</pre>";
+        $db->rollBack(); // If an error occurs, roll back the transaction and show an error message
+
+        // Display the full error message in the flash message
+        flash("Error creating checking account: " . $e->getMessage(), "danger");
+
+        header("Location: " . get_url('newAccount.php'));
+        exit;
     }
 }
 ?>
@@ -54,6 +83,9 @@ if (isset($_POST["create_account"])) {
         <label for="account_number">Account Number</label>
         <input type="text" name="account_number" id="account_number" value="<?php echo generate_unique_account_number(); ?>" readonly />
     </div>
+    <!-- Include other input fields for account creation (e.g., account holder name, etc.) -->
+    <!-- ... -->
+
     <input type="submit" value="Create Account" name="create_account" />
 </form>
 

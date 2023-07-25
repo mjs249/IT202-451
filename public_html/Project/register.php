@@ -1,116 +1,80 @@
 <?php
-require(__DIR__ . "/../../partials/nav.php");
-reset_session();
-?>
+require_once(__DIR__ . "/../../partials/nav.php");
+require_once(__DIR__ . "/../../lib/sanitizers.php");
+is_logged_in(true);
 
-<?php
-function has_flash_messages($type = null)
+function generate_unique_account_number()
 {
-    if (isset($_SESSION["flash_messages"])) {
-        $flashMessages = $_SESSION["flash_messages"];
-        if ($type !== null) {
-            foreach ($flashMessages as $message) {
-                if ($message["type"] === $type) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            return count($flashMessages) > 0;
-        }
-    }
-    return false;
+    return str_pad(mt_rand(0, 999999999999), 12, '0', STR_PAD_LEFT);
 }
 
-$hasError = false;
+if (isset($_POST["create_account"])) {
+    $user_id = get_user_id();
+    $account_number = generate_unique_account_number();
+    $account_type = "checking";
+    $initial_deposit = 5;
 
-if (isset($_POST["email"]) && isset($_POST["password"]) && isset($_POST["confirm"]) && isset($_POST["username"])) {
-    $email = se($_POST, "email", "", false);
-    $password = se($_POST, "password", "", false);
-    $confirm = se($_POST, "confirm", "", false);
-    $username = se($_POST, "username", "", false);
+    $db = getDB();
+    $db->beginTransaction(); // Start a transaction to handle both INSERTs as a pair
 
-    if (empty($email)) {
-        flash("Email must not be empty", "danger");
-        $hasError = true;
-    } else {
-        //sanitize
-        $email = sanitize_email($email);
-        //validate
-        if (!is_valid_email($email)) {
-            flash("Invalid email address", "danger");
-            $hasError = true;
-        }
+    // Step 1: Record the transaction from the world account to the new checking account
+    $stmt = $db->prepare("INSERT INTO Transactions (account_src, account_dest, balance_change, transaction_type, expected_total) VALUES (-1, :account_dest, :balance_change, 'initial_deposit', :expected_total)");
+    try {
+        $stmt->execute([
+            ":account_dest" => $account_number,
+            ":balance_change" => $initial_deposit,
+            ":expected_total" => $initial_deposit,
+        ]);
+    } catch (Exception $e) {
+        $db->rollBack(); // If an error occurs, roll back the transaction and show an error message
+        echo "<pre>" . var_export($e->errorInfo, true) . "</pre>";
+        // User-friendly error message
+        flash("Error creating checking account. Please try again later.", "danger");
+        header("Location: " . get_url('create_account.php'));
+        exit;
     }
 
-    if (!is_valid_username($username)) {
-        flash("Username must only contain 3-16 characters a-z, 0-9, _, or -", "danger");
-        $hasError = true;
-    }
+    // Step 2: Update the Accounts table with the new checking account data
+    $stmt = $db->prepare("INSERT INTO RM_Accounts (account, user_id, balance, account_type) VALUES (:account, :user_id, :balance, :account_type)");
+    try {
+        $stmt->execute([
+            ":account" => $account_number,
+            ":user_id" => $user_id,
+            ":balance" => $initial_deposit,
+            ":account_type" => $account_type,
+        ]);
 
-    if (empty($password)) {
-        flash("Password must not be empty", "danger");
-        $hasError = true;
-    }
+        // Commit the transaction
+        $db->commit();
 
-    if (empty($confirm)) {
-        flash("Confirm password must not be empty", "danger");
-        $hasError = true;
-    }
+        // User-friendly success message
+        flash("Checking account created successfully!", "success");
 
-    if (!is_valid_password($password)) {
-        flash("Password too short", "danger");
-        $hasError = true;
-    }
-
-    if ($password !== $confirm) {
-        flash("Passwords must match", "danger");
-        $hasError = true;
-    }
-
-    if (!$hasError) {
-        $hash = password_hash($password, PASSWORD_BCRYPT);
-        $db = getDB();
-        $stmt = $db->prepare("INSERT INTO Users (email, password, username) VALUES(:email, :password, :username)");
-        try {
-            $stmt->execute([":email" => $email, ":password" => $hash, ":username" => $username]);
-            flash("Successfully registered!", "success");
-        } catch (Exception $e) {
-            users_check_duplicate($e->errorInfo);
-        }
+        // Redirect user to their Accounts page upon success
+        header("Location: " . get_url('dashboard.php'));
+        exit;
+    } catch (Exception $e) {
+        $db->rollBack(); // If an error occurs, roll back the transaction and show an error message
+        echo "<pre>" . var_export($e->errorInfo, true) . "</pre>";
+        // User-friendly error message
+        flash("Error creating checking account. Please try again later.", "danger");
+        header("Location: " . get_url('create_account.php'));
+        exit;
     }
 }
 ?>
 
-<form onsubmit="return validate(this)" method="POST">
-    <div>
-        <label for="email">Email</label>
-        <input type="email" name="email" value="<?php echo isset($_POST["email"]) ? htmlspecialchars($_POST["email"]) : ""; ?>" required />
+<h1>Create Checking Account</h1>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="account_number">Account Number</label>
+        <input type="text" name="account_number" id="account_number" value="<?php echo generate_unique_account_number(); ?>" readonly />
     </div>
-    <div>
-        <label for="username">Username</label>
-        <input type="text" name="username" value="<?php echo isset($_POST["username"]) ? htmlspecialchars($_POST["username"]) : ""; ?>" required maxlength="30" />
-    </div>
-    <div>
-        <label for="pw">Password</label>
-        <input type="password" id="pw" name="password" required minlength="8" />
-    </div>
-    <div>
-        <label for="confirm">Confirm</label>
-        <input type="password" name="confirm" required minlength="8" />
-    </div>
-    <input type="submit" value="Register" />
+    <!-- Include other input fields for account creation (e.g., account holder name, etc.) -->
+    <!-- ... -->
+
+    <input type="submit" value="Create Account" name="create_account" />
 </form>
 
-<script>
-    function validate(form) {
-        // TODO: implement JavaScript validation
-        // ensure it returns false for an error and true for success
-
-        return true;
-    }
-</script>
-
-<?php
-require(__DIR__ . "/../../partials/flash.php");
-?>
+<?php require_once(__DIR__ . "/../../partials/flash.php"); ?>

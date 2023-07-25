@@ -1,9 +1,10 @@
-CREATE TABLE IF NOT EXISTS RM_Accounts (
+CREATE TABLE IF NOT EXISTS Accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    account VARCHAR(12) UNIQUE NOT NULL,
+    account_number VARCHAR(12) NOT NULL UNIQUE,
     user_id INT,
-    balance INT DEFAULT 0,
+    balance DECIMAL(10, 2) DEFAULT '0.00',
+    account_type VARCHAR(50),
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CHECK (balance >= 0 AND LENGTH(account) = 12)
-);
+    CONSTRAINT FK_Accounts_Users FOREIGN KEY (user_id) REFERENCES Users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
