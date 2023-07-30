@@ -18,6 +18,13 @@ function get_user_accounts($user_id)
 // Get user accounts
 $user_accounts = get_user_accounts($user_id);
 
+// Get world account id
+$db = getDB();
+$stmt = $db->prepare("SELECT id FROM Accounts WHERE account_number = '000000000000'");
+$stmt->execute();
+$world_account = $stmt->fetch(PDO::FETCH_ASSOC);
+$world_account_id = $world_account['id'];
+
 // Handle the form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $account_id = $_POST["account_id"];
@@ -44,10 +51,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $new_balance = $account['balance'] + $amount;
 
         // Step 3: Record the deposit transaction from "world account" to the user's account
-        $world_user_id = -1; // The user_id for the "world account"
-        $stmt = $db->prepare("INSERT INTO Transactions (account_src, account_dest, balance_change, transaction_type, expected_total, memo) VALUES (:world_user_id, :account_id, :balance_change, :transaction_type, :expected_total, :memo)");
+        $stmt = $db->prepare("INSERT INTO Transactions (account_src, account_dest, balance_change, transaction_type, expected_total, memo) VALUES (:world_account_id, :account_id, :balance_change, :transaction_type, :expected_total, :memo)");
         $stmt->execute([
-            ':world_user_id' => $world_user_id,
+            ':world_account_id' => $world_account_id,
             ':account_id' => $account['id'],
             ':balance_change' => $amount,
             ':transaction_type' => "deposit",
@@ -59,14 +65,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $db->prepare("UPDATE Accounts SET balance = :new_balance WHERE id = :account_id");
         $stmt->execute([':new_balance' => $new_balance, ':account_id' => $account['id']]);
 
-        // Step 5: Update the balance of the "world account" by summing the balance_change for the account_dest against the Transactions table
-        $world_user_id = -1; // The user_id for the "world account"
-        $stmt = $db->prepare("UPDATE Accounts AS a
-                                SET balance = (SELECT COALESCE(SUM(t.balance_change), 0) 
-                                              FROM Transactions t 
-                                              WHERE t.account_dest = a.id)
-                                WHERE a.user_id = :world_user_id");
-        $stmt->execute([':world_user_id' => $world_user_id]);
+        // Step 5: Update the balance of the "world account" by subtracting the deposit amount
+        $stmt = $db->prepare("UPDATE Accounts SET balance = balance - :amount WHERE id = :world_account_id");
+        $stmt->execute([':amount' => $amount, ':world_account_id' => $world_account_id]);
 
         $db->commit(); // Commit the transaction
 
@@ -75,10 +76,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: " . get_url('myAccounts.php'));
         exit;
     } catch (Exception $e) {
-        $db->rollBack(); // If an error occurs, roll back the transaction and show an error message
+        $db->rollBack(); // If an error occurs, roll back the transaction
 
-        // Display the full error message in the flash message
-        flash("Error performing deposit: " . $e->getMessage(), "danger");
+        // Display a generic error message in the flash message
+        flash("An error occurred during the transaction. Please try again.", "danger");
 
         header("Location: " . get_url('deposit.php'));
         exit;

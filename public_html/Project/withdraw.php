@@ -65,13 +65,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $db->prepare("UPDATE Accounts SET balance = :new_balance WHERE id = :account_id");
         $stmt->execute([':new_balance' => $new_balance, ':account_id' => $account['id']]);
 
-        // Step 5: Update the balance of the "world account" by summing the balance_change for the account_src against the Transactions table
-        $stmt = $db->prepare("UPDATE Accounts AS a
-                                SET balance = (SELECT COALESCE(SUM(t.balance_change), 0) 
-                                              FROM Transactions t 
-                                              WHERE t.account_src = a.id)
-                                WHERE a.user_id = :world_user_id");
+        // Step 5: Get the "world account"
+        $stmt = $db->prepare("SELECT id, balance FROM Accounts WHERE user_id = :world_user_id");
         $stmt->execute([':world_user_id' => $world_user_id]);
+        $world_account = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Step 6: Update the balance of the "world account"
+        $world_balance = $world_account['balance'] + $amount;
+        $stmt = $db->prepare("UPDATE Accounts SET balance = :world_balance WHERE id = :world_id");
+        $stmt->execute([':world_balance' => $world_balance, ':world_id' => $world_account['id']]);
 
         $db->commit(); // Commit the transaction
 
