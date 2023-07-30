@@ -1,3 +1,64 @@
+/* Add styles for the table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #CCCCCC;
+}
+
+/* Format date and time */
+table td:nth-child(3) {
+    white-space: nowrap; /* Prevent line break */
+}
+
+/* Highlight table header */
+table th {
+    background-color: #333333;
+    color: #FFFFFF;
+}
+
+/* Add hover effect to table rows */
+table tbody tr:hover {
+    background-color: #F0F0F0;
+}
+
+/* Adjust alert styles */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background-color: #D4EDDA;
+    color: #155724;
+    border: 1px solid #C3E6CB;
+}
+
+.alert-warning {
+    background-color: #FFF3CD;
+    color: #856404;
+    border: 1px solid #FFEEBA;
+}
+
+.alert-danger {
+    background-color: #F8D7DA;
+    color: #721C24;
+    border: 1px solid #F5C6CB;
+}
+
+.alert-info {
+    background-color: #D1ECF1;
+    color: #0C5460;
+    border: 1px solid #BEE5EB;
+}
+
+/* Rest of the existing styles */
+
 body {
     background-color: #FAFAFA;
     color: #333333;
@@ -5,42 +66,6 @@ body {
     line-height: 1.6;
     margin: 20px;
     padding: 0;
-}
-
-.alert-success {
-    background-color: #D4EDDA;
-    color: #155724;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid #C3E6CB;
-    border-radius: 5px;
-}
-
-.alert-warning {
-    background-color: #FFF3CD;
-    color: #856404;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid #FFEEBA;
-    border-radius: 5px;
-}
-
-.alert-danger {
-    background-color: #F8D7DA;
-    color: #721C24;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid #F5C6CB;
-    border-radius: 5px;
-}
-
-.alert-info {
-    background-color: #D1ECF1;
-    color: #0C5460;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid #BEE5EB;
-    border-radius: 5px;
 }
 
 nav {

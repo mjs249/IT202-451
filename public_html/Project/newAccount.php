@@ -64,11 +64,15 @@ if (isset($_POST["create_account"])) {
         // Redirect user to their Accounts page upon success
         header("Location: " . get_url('dashboard.php'));
         exit;
-    } catch (Exception $e) {
+    } catch (PDOException $e) {
         $db->rollBack(); // If an error occurs, roll back the transaction and show an error message
 
-        // Display the full error message in the flash message
-        flash("Error creating checking account: " . $e->getMessage(), "danger");
+        // Check the error code for specific constraint violations
+        if ($e->getCode() == 23000) {
+            flash("Error creating checking account: Account number is already in use. Please try again.", "danger");
+        } else {
+            flash("Error creating checking account: An unexpected error occurred. Please try again later.", "danger");
+        }
 
         header("Location: " . get_url('newAccount.php'));
         exit;
