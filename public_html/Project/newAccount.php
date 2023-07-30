@@ -79,7 +79,16 @@ if (isset($_POST["create_account"])) {
     }
 }
 ?>
-
+<nav class="secondary">
+        <ul>
+        <li><a href="<?php echo get_url('newAccount.php'); ?>">Create Account</a></li>
+            <li><a href="<?php echo get_url('myAccounts.php'); ?>">My Accounts</a></li>
+            <li><a href="<?php echo get_url('deposit.php'); ?>">Deposit</a></li>
+            <li><a href="<?php echo get_url('withdraw.php'); ?>">Withdraw</a></li>
+            <li><a href="#">Transfer</a></li>
+            <li><a href="#">Profile</a></li>
+        </ul>
+    </nav>
 <h1>Create Checking Account</h1>
 
 <form method="POST">

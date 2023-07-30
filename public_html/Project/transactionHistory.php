@@ -13,7 +13,11 @@ if (isset($_GET['account_id'])) {
     $account = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Fetch transaction history from the Transactions table
-    $stmt = $db->prepare("SELECT t.id, t.account_src, t.account_dest, t.balance_change, t.transaction_type, t.memo, t.expected_total, t.created FROM Transactions t WHERE account_src = :account_id OR account_dest = :account_id ORDER BY t.created DESC LIMIT 10");
+    $stmt = $db->prepare("SELECT t.id, src.account_number AS account_src, dest.account_number AS account_dest, t.balance_change, t.transaction_type, t.memo, t.expected_total, t.created 
+                          FROM Transactions t 
+                          LEFT JOIN Accounts src ON t.account_src = src.id
+                          LEFT JOIN Accounts dest ON t.account_dest = dest.id
+                          WHERE account_src = :account_id OR account_dest = :account_id ORDER BY t.created DESC LIMIT 10");
     $stmt->execute([':account_id' => $account_id]);
     $transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
@@ -22,7 +26,16 @@ if (isset($_GET['account_id'])) {
     exit;
 }
 ?>
-
+<nav class="secondary">
+        <ul>
+        <li><a href="<?php echo get_url('newAccount.php'); ?>">Create Account</a></li>
+            <li><a href="<?php echo get_url('myAccounts.php'); ?>">My Accounts</a></li>
+            <li><a href="<?php echo get_url('deposit.php'); ?>">Deposit</a></li>
+            <li><a href="<?php echo get_url('withdraw.php'); ?>">Withdraw</a></li>
+            <li><a href="#">Transfer</a></li>
+            <li><a href="#">Profile</a></li>
+        </ul>
+    </nav>
 <h1>Transaction History</h1>
 
 <h2>Account Details</h2>

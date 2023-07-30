@@ -15,7 +15,7 @@ require(__DIR__ . "/../../partials/nav.php");
         <?php error_log("Session data: " . var_export($_SESSION, true)); ?>
     <?php endif; ?>
 
-    <nav>
+    <nav class="secondary">
         <ul>
         <li><a href="<?php echo get_url('newAccount.php'); ?>">Create Account</a></li>
             <li><a href="<?php echo get_url('myAccounts.php'); ?>">My Accounts</a></li>
