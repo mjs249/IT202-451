@@ -5,7 +5,13 @@ is_logged_in(true);
 
 function generate_unique_account_number()
 {
-    return str_pad(mt_rand(0, 999999999999), 12, '0', STR_PAD_LEFT);
+    $db = getDB();
+    do {
+        $account_number = str_pad(mt_rand(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        $stmt = $db->prepare("SELECT COUNT(1) FROM Accounts WHERE account_number = :account_number");
+        $stmt->execute([":account_number" => $account_number]);
+    } while ($stmt->fetchColumn() > 0);
+    return $account_number;
 }
 
 if (isset($_POST["create_account"])) {
@@ -16,13 +22,13 @@ if (isset($_POST["create_account"])) {
 
     try {
         $db = getDB();
-        $db->beginTransaction(); // Start a transaction to handle both INSERTs as a pair
+        $db->beginTransaction(); 
 
         // Step 1: Record the transaction from the world account to the new checking account
         $stmt = $db->prepare("INSERT INTO Transactions (account_src, account_dest, balance_change, transaction_type, expected_total) VALUES (:account_src, NULL, :balance_change, 'initial_deposit', :expected_total)");
         $stmt->execute([
-            ":account_src" => -1, // Use -1 for the world account
-            ":balance_change" => -$initial_deposit, // Negative change for the world account
+            ":account_src" => -1,
+            ":balance_change" => -$initial_deposit,
             ":expected_total" => $initial_deposit,
         ]);
 
@@ -51,7 +57,7 @@ if (isset($_POST["create_account"])) {
         // Step 3: Update the balance of the world account
         $stmt = $db->prepare("UPDATE Accounts SET balance = balance - :balance_change WHERE id = :world_account_id");
         $stmt->execute([
-            ":world_account_id" => -1, // Use -1 for the world account ID
+            ":world_account_id" => -1,
             ":balance_change" => $initial_deposit,
         ]);
 
@@ -65,14 +71,10 @@ if (isset($_POST["create_account"])) {
         header("Location: " . get_url('dashboard.php'));
         exit;
     } catch (PDOException $e) {
-        $db->rollBack(); // If an error occurs, roll back the transaction and show an error message
+        $db->rollBack(); 
 
-        // Check the error code for specific constraint violations
-        if ($e->getCode() == 23000) {
-            flash("Error creating checking account: Account number is already in use. Please try again.", "danger");
-        } else {
-            flash("Error creating checking account: An unexpected error occurred. Please try again later.", "danger");
-        }
+        // Don't show specific error messages, just a general one
+        flash("Error creating checking account. Please try again later.", "danger");
 
         header("Location: " . get_url('newAccount.php'));
         exit;
@@ -80,15 +82,15 @@ if (isset($_POST["create_account"])) {
 }
 ?>
 <nav class="secondary">
-        <ul>
+    <ul>
         <li><a href="<?php echo get_url('newAccount.php'); ?>">Create Account</a></li>
-            <li><a href="<?php echo get_url('myAccounts.php'); ?>">My Accounts</a></li>
-            <li><a href="<?php echo get_url('deposit.php'); ?>">Deposit</a></li>
-            <li><a href="<?php echo get_url('withdraw.php'); ?>">Withdraw</a></li>
-            <li><a href="#">Transfer</a></li>
-            <li><a href="#">Profile</a></li>
-        </ul>
-    </nav>
+        <li><a href="<?php echo get_url('myAccounts.php'); ?>">My Accounts</a></li>
+        <li><a href="<?php echo get_url('deposit.php'); ?>">Deposit</a></li>
+        <li><a href="<?php echo get_url('withdraw.php'); ?>">Withdraw</a></li>
+        <li><a href="#">Transfer</a></li>
+        <li><a href="#">Profile</a></li>
+    </ul>
+</nav>
 <h1>Create Checking Account</h1>
 
 <form method="POST">
