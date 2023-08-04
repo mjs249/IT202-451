@@ -21,8 +21,6 @@ if (($localWorks && $domain == "localhost") || $domain != "localhost") {
     ]);
 }
 session_start();
-
-
 ?>
 <!-- include css and js files -->
 <link rel="stylesheet" href="<?php echo get_url('styles.css'); ?>">
@@ -31,6 +29,7 @@ session_start();
     <ul>
         <?php if (is_logged_in()) : ?>
             <li><a href="<?php echo get_url('home.php'); ?>">Home</a></li>
+            <li><a href="<?php echo get_url('dashboard.php'); ?>">Dashboard</a></li> <!-- Add the link to the Dashboard page -->
             <li><a href="<?php echo get_url('profile.php'); ?>">Profile</a></li>
         <?php endif; ?>
         <?php if (!is_logged_in()) : ?>
