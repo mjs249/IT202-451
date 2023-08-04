@@ -1,6 +1,6 @@
 <?php
 require_once(__DIR__ . "/../../partials/nav.php");
-require_once(__DIR__ . "/../../lib/sanitizers.php"); 
+require_once(__DIR__ . "/../../lib/sanitizers.php"); // Replace "path/to/sanitizers.php" with the actual path to your sanitizers.php file
 is_logged_in(true);
 ?>
 
@@ -111,6 +111,7 @@ if (isset($_POST["save"])) {
 $email = get_user_email();
 $username = get_username();
 ?>
+
 <form method="POST" onsubmit="return validate(this);">
     <div class="mb-3">
         <label for="email">Email</label>
@@ -121,8 +122,7 @@ $username = get_username();
         <input type="text" name="username" id="username" value="<?php se($username); ?>" />
     </div>
     <!-- DO NOT PRELOAD PASSWORD -->
-    <div><strong>Password Reset</strong></div>
-    <br>
+    <div>Password Reset</div>
     <div class="mb-3">
         <label for="cp">Current Password</label>
         <input type="password" name="currentPassword" id="cp" />
